@@ -16,23 +16,24 @@
         .table-wrapper { width: 100%; overflow-x: auto; }
         .config-bar { width: 100%; max-width: 1150px; background: var(--th); padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; flex-wrap: wrap; gap: 15px; }
         .config-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-        input, select { background: #121212; border: 1px solid #555; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 1rem; font-weight: bold; font-family: inherit; }
+        input, select { background: #121212; border: 1px solid #555; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 1rem; font-weight: bold; font-family: inherit; text-align: center; }
         select { color: #1e90ff; cursor: pointer; }
-        .config-bar input { width: 60px; text-align: center; }
+        .config-bar input { width: 60px; }
         table { width: 100%; border-collapse: collapse; text-align: center; font-size: 1.1rem; }
-        th, td { padding: 14px 10px; border-bottom: 1px solid #333; vertical-align: middle; white-space: nowrap; }
+        th, td { padding: 14px 10px; border-bottom: 1px solid #333; vertical-align: middle; white-space: nowrap; text-align: center; } /* 確保所有單元格完全置中 */
         th { background: var(--th); color: #ffa502; font-weight: bold; }
         tbody tr:hover { background: var(--hover); }
         .dirty-cell { background: rgba(255, 165, 2, 0.15) !important; border: 2px dashed var(--dirty) !important; border-radius: 6px; }
         .rank-1 { color: #ffd700; font-weight: bold; font-size: 1.4rem; text-shadow: 0 0 5px rgba(255,215,0,0.3); }
         .rank-2 { color: #c0c0c0; font-weight: bold; font-size: 1.25rem; }
         .rank-3 { color: #cd7f32; font-weight: bold; font-size: 1.15rem; }
-        .hp-bar-container { width: 80px; background: #444; border-radius: 4px; display: inline-block; margin-left: 8px; vertical-align: middle; overflow: hidden; }
+        .hp-container { display: flex; align-items: center; justify-content: center; gap: 8px; } /* 讓血量數字與血條在儲存格內完美置中 */
+        .hp-bar-container { width: 80px; background: #444; border-radius: 4px; overflow: hidden; display: inline-block; }
         .hp-bar { height: 10px; background: #2ed573; transition: width 0.2s; }
         .round-cell { color: #1e90ff; font-weight: bold; }
         .round-cell.has-value { color: #ffa502; }
         .action-btns { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-        button { border: none; border-radius: 4px; padding: 7px 14px; font-weight: bold; cursor: pointer; color: #fff; transition: transform 0.1s, opacity 0.2s; font-size: 0.9rem; font-family: inherit; }
+        button { border: none; border-radius: 4px; padding: 7px 14px; font-weight: bold; cursor: pointer; color: #fff; transition: transform 0.1s, opacity 0.2s; font-size: 0.9rem; font-family: inherit; text-align: center; }
         button:active { transform: scale(0.95); }
         button:hover { opacity: 0.9; }
         .btn-hp-add { background: #2ed573; color: #000; }
@@ -203,7 +204,7 @@
                 let isHpDirty = p.hp !== orig.hp, isPtDirty = JSON.stringify(p.roundScores) !== JSON.stringify(orig.roundScores);
                 return `<tr>
                     <td><strong>${p.name}</strong></td>
-                    <td class="${isHpDirty?'dirty-cell':''}"><span style="display:inline-block;width:35px;text-align:right;">${p.hp}</span>${isHpDirty?'⚠️':''}<div class="hp-bar-container"><div class="hp-bar" style="width:${Math.min((p.hp/maxHp)*100,100)}%;"></div></div></td>
+                    <td class="${isHpDirty?'dirty-cell':''}"><div class="hp-container"><span style="display:inline-block;width:25px;text-align:right;">${p.hp}</span>${isHpDirty?'⚠️':''}<div class="hp-bar-container"><div class="hp-bar" style="width:${Math.min((p.hp/maxHp)*100,100)}%;"></div></div></div></td>
                     <td class="${isPtDirty?'dirty-cell':''}" style="color:#ffa502;font-weight:bold;">${getSum(p.roundScores)} 分 ${isPtDirty?'(✏️)':''}</td>
                     <td class="${getRankClass(orig.rank)}">第 ${orig.rank} 名</td>
                     <td><div class="action-btns">
