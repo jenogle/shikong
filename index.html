@@ -5,23 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>失控事務所積分錦標賽</title>
     
-    <!-- 鎖定 Google Fonts 公開字型：Orbitron 與 思源黑體 -->
+    <!-- 鎖定 Google Fonts：Share Tech Mono (數據科幻風) 與 思源黑體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --card-bg: #262626;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
             --text-color: #ffffff;
             --accent-color: #ff4757;
             --table-header: #2f3542;
-            --table-hover: #333333;
+            --table-hover: #2d2d2d;
+            --dirty-color: #ffa502;
         }
 
         body {
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
+            font-family: 'Share Tech Mono', 'Noto Sans TC', monospace, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -35,7 +36,7 @@
             color: var(--accent-color);
             font-size: 2.5rem;
             margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.4);
             letter-spacing: 2px;
             text-align: center;
         }
@@ -58,25 +59,25 @@
             background-color: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
             box-sizing: border-box;
             margin-bottom: 20px;
+            border: 1px solid #333;
         }
 
-        /* 讓表格擁有獨立的橫向滾動條 */
         .table-wrapper {
             width: 100%;
             overflow-x: auto;
         }
 
-        /* 設定控制列 */
+        /* 頂部設定/控制列 */
         .config-bar {
             width: 100%;
             max-width: 1150px;
             background-color: #2f3542;
             padding: 15px 20px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -98,24 +99,24 @@
             gap: 10px;
         }
 
-        .config-bar label {
+        .config-bar label, .setup-container label {
             font-weight: bold;
             color: #ffa502;
             font-size: 1rem;
         }
 
-        .config-bar input, .config-bar select {
-            background-color: #1a1a1a;
+        input, select {
+            background-color: #121212;
             border: 1px solid #555;
             color: #fff;
             padding: 8px 12px;
             border-radius: 4px;
             font-size: 1rem;
             font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
+            font-family: inherit;
         }
 
-        .config-bar select {
+        select {
             color: #1e90ff;
             cursor: pointer;
         }
@@ -125,10 +126,42 @@
             text-align: center;
         }
 
-        .config-bar input:focus, .config-bar select:focus {
-            border-color: var(--accent-color);
-            outline: none;
+        /* 👥 名單設置表單區塊樣式 */
+        .setup-toggle-btn {
+            background-color: #3e4452;
+            color: #fff;
+            width: 100%;
+            max-width: 1150px;
+            text-align: left;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border: 1px dashed #555;
         }
+        
+        .setup-container {
+            display: none; /* 預設收合 */
+            width: 100%;
+            max-width: 1150px;
+            background-color: #1c222d;
+            border: 1px solid #2ed573;
+            padding: 20px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        .player-input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .player-input-row input[type="text"] { width: 200px; }
+        .player-input-row input[type="number"] { width: 100px; text-align: center; }
 
         table {
             width: 100%;
@@ -139,7 +172,7 @@
 
         th, td {
             padding: 14px 10px;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #333;
             vertical-align: middle;
             white-space: nowrap;
         }
@@ -151,11 +184,6 @@
             letter-spacing: 1px;
         }
 
-        th.hp-header {
-            color: #2ed573;
-            text-shadow: 0 0 5px rgba(46, 213, 115, 0.3);
-        }
-
         tbody tr {
             transition: background-color 0.15s;
         }
@@ -164,12 +192,22 @@
             background-color: var(--table-hover);
         }
 
-        /* 名次特殊顏色 */
-        .rank-1 { color: #ffd700; font-weight: bold; font-size: 1.3rem; }
-        .rank-2 { color: #c0c0c0; font-weight: bold; font-size: 1.2rem; }
+        .dirty-cell {
+            background-color: rgba(255, 165, 2, 0.15) !important;
+            border: 2px dashed var(--dirty-color) !important;
+            border-radius: 6px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+
+        .rank-1 { color: #ffd700; font-weight: bold; font-size: 1.4rem; text-shadow: 0 0 5px rgba(255,215,0,0.3); }
+        .rank-2 { color: #c0c0c0; font-weight: bold; font-size: 1.25rem; }
         .rank-3 { color: #cd7f32; font-weight: bold; font-size: 1.15rem; }
         
-        /* 血條視覺 */
         .hp-bar-container {
             width: 80px;
             background-color: #444;
@@ -180,14 +218,12 @@
             overflow: hidden;
         }
         .hp-bar {
-            height: 8px;
+            height: 10px;
             background-color: #2ed573;
             transition: width 0.2s ease;
         }
 
-        /* 下方明細表的專屬微調 */
         .round-cell {
-            font-family: 'Orbitron', sans-serif;
             color: #1e90ff;
             font-weight: bold;
         }
@@ -205,30 +241,44 @@
         button {
             border: none;
             border-radius: 4px;
-            padding: 6px 12px;
+            padding: 7px 14px;
             font-weight: bold;
             cursor: pointer;
             color: white;
-            transition: transform 0.1s, opacity 0.2s;
+            transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
             font-size: 0.9rem;
-            font-family: 'Orbitron', 'Noto Sans TC', sans-serif;
+            font-family: inherit;
         }
 
-        button:active {
-            transform: scale(0.95);
-        }
-
-        button:hover {
-            opacity: 0.8;
-        }
+        button:active { transform: scale(0.95); }
+        button:hover { opacity: 0.9; }
 
         .btn-hp-add { background-color: #2ed573; color: #000; }
         .btn-hp-sub { background-color: #ff4757; }
         .btn-pt-add { background-color: #1e90ff; }
         .btn-pt-sub { background-color: #ff6348; }
         .btn-add-round { background-color: #2ed573; color: #000; }
-        .btn-edit { background-color: #747d8c; }
-        .btn-reset { background-color: #747d8c; color: #fff; padding: 6px 10px; font-size: 0.85rem;}
+        .btn-edit { background-color: #57606f; }
+        .btn-reset { background-color: #57606f; color: #fff; padding: 6px 10px; font-size: 0.85rem;}
+        .btn-danger { background-color: #ff4757; }
+        .btn-success { background-color: #2ed573; color: #000; }
+        
+        .btn-submit-all {
+            background-color: #ffa502;
+            color: #000;
+            font-size: 1rem;
+            padding: 8px 20px;
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(255, 165, 2, 0.4);
+        }
+        .btn-submit-all.glow {
+            animation: buttonGlow 1s infinite alternate;
+            background-color: #2ed573;
+        }
+        @keyframes buttonGlow {
+            from { box-shadow: 0 0 5px #2ed573; }
+            to { box-shadow: 0 0 20px #2ed573, 0 0 10px #2ed573; }
+        }
 
     </style>
 </head>
@@ -236,133 +286,226 @@
 
     <h1>失控事務所積分錦標賽</h1>
 
-    <!-- 頂部設定列 -->
+    <!-- 👥 可展開/收合的名單初始設定表單 -->
+    <button class="setup-toggle-btn" onclick="toggleSetupSection()">👥 點此展開/收合：名單與初始血量設定表單</button>
+    <div id="setup-section" class="setup-container">
+        <h3 style="margin-top:0; color:#2ed573;">🛠️ 撰寫本次參賽名單與命數 (初始血量)</h3>
+        <p style="color:#aaa; font-size:0.9rem; margin-bottom:15px;">提示：導入新名單會重置當前所有對戰局數的分數，請在賽事開始前設定完成。</p>
+        
+        <div id="player-inputs-list">
+            <!-- 由 JS 動態渲染輸入行 -->
+        </div>
+        
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+            <button type="button" class="btn-edit" onclick="addPlayerInputRow('', 20)">➕ 追加新參賽者</button>
+            <button type="button" class="btn-success" onclick="importCustomNewTournament()">🔥 導入名單並開啟新賽局</button>
+        </div>
+    </div>
+
+    <!-- 頂部運行控制列 -->
     <div class="config-bar">
         <div class="config-left">
-            <!-- 血量上限設定 -->
             <div class="config-item">
-                <label for="max-hp-input">🩸 血量上限：</label>
+                <label for="max-hp-input">🩸 血量顯示上限：</label>
                 <input type="number" id="max-hp-input" value="20" min="1" oninput="updateMaxHp(this.value)">
             </div>
             
-            <!-- 當前賽局選擇器 -->
             <div class="config-item">
                 <label for="round-select">🎮 目前管理局數：</label>
                 <select id="round-select" onchange="changeCurrentRound(this.value)">
-                    <!-- 由 JS 動態生成 -->
+                    <!-- JS 動態生成 -->
                 </select>
             </div>
 
-            <!-- 新增局數按鈕 -->
             <button class="btn-add-round" onclick="addNewRound()">➕ 新增局數</button>
+            <button class="btn-reset" onclick="resetToDefault()">🔄 全賽局重設</button>
         </div>
         
-        <!-- 重設按鈕 -->
-        <button class="btn-reset" onclick="resetToDefault()">🔄 全賽局重設</button>
+        <!-- 大確認發布按鈕 -->
+        <button id="main-submit-btn" class="btn-submit-all" onclick="commitChanges()">🚀 確定發布變更</button>
     </div>
 
-    <!-- 上方區塊：操作與即時排行 -->
-    <h2>⚔️ 實時對戰操作面板 (依血量排序)</h2>
+    <!-- 上方區塊：暫存操作面板 -->
+    <h2>⚔️ 實時對戰操作面板 (按下發布變更鈕後才會更新排序)</h2>
     <div class="container">
         <div class="table-wrapper">
-            <table id="top-table">
+            <table>
                 <thead>
                     <tr>
                         <th>參賽者</th>
-                        <th class="hp-header">血量 (▼)</th>
+                        <th>血量</th>
                         <th>已獲得積分</th>
                         <th>名次</th>
-                        <th>操作 (變更數值)</th>
+                        <th>操作 (僅修改暫存，不影響目前排行)</th>
                     </tr>
                 </thead>
                 <tbody id="top-table-body">
-                    <!-- 由 JS 動態渲染 -->
+                    <!-- JS 動態渲染 -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- 下方區塊：各局數據明細 -->
+    <!-- 下方區塊：明細表格 -->
     <h2>📊 各局得分明細數據大表</h2>
     <div class="container">
         <div class="table-wrapper">
-            <table id="bottom-table">
+            <table>
                 <thead id="bottom-table-head">
-                    <!-- 由 JS 動態生成各局欄位 -->
+                    <!-- JS 動態生成 -->
                 </thead>
                 <tbody id="bottom-table-body">
-                    <!-- 由 JS 動態渲染 -->
+                    <!-- JS 動態渲染 -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // 初始名單 (純淨名單：無內嵌原始分數)
+        // 內建預設名單 (第一次開啟時使用)
         const defaultParticipants = [
-            { name: "emily", hp: 12, points: 0 },
-            { name: "Jamie", hp: 12,  points: 0 },
-            { name: "怡", hp: 11, points: 0 },
-            { name: "wei", hp: 9 , points: 0 },
-            { name: "NI", hp: 1, points: 0 },
-            { name: "翠翠", hp: 12, points: 0 },
-            { name: "花花", hp: 1, points: 0 },
-            { name: "大學", hp: 9, points: 0 },
-            { name: "難姐", hp: 11, points: 0 },
-            { name: "亞", hp: 6,  points: 0 }  
+                        { name: "emily", hp: 2 }, 
+
+            { name: "jamie", hp: 11 }, 
+            { name: "怡", hp: 9 }, 
+            { name: "wei", hp: 11 }, 
+            { name: "羊", hp: 1 } , 
+            { name: "大學", hp: 8 }, 
+            { name: "難", hp: 5 }, 
+            { name: "翠翠", hp: 11 }, 
+            { name: "呱", hp: 6 } ,
+            { name: "alisa", hp: 8 },
+            { name: "九同", hp: 1 }  
         ];
         
         const defaultMaxHp = 20;
         const defaultTotalRounds = 10;
 
-        let participants = [];
+        let participants = []; // 正式資料
+        let scratchpad = [];   // 暫存草稿區
+
         let maxHp = 20;
         let totalRounds = 10;
         let currentRound = 1; 
+        let hasUnsavedChanges = false;
 
         // 初始化
         function init() {
-            const savedPlayers = localStorage.getItem('sk_tour_v6_players');
-            const savedMaxHp = localStorage.getItem('sk_tour_v6_maxhp');
-            const savedTotalRounds = localStorage.getItem('sk_tour_v6_totalrounds');
+            const savedPlayers = localStorage.getItem('sk_tour_v8_players');
+            const savedMaxHp = localStorage.getItem('sk_tour_v8_maxhp');
+            const savedTotalRounds = localStorage.getItem('sk_tour_v8_totalrounds');
 
-            if (savedMaxHp) {
-                maxHp = parseInt(savedMaxHp);
-                document.getElementById('max-hp-input').value = maxHp;
-            } else {
-                maxHp = defaultMaxHp;
-            }
-
-            if (savedTotalRounds) {
-                totalRounds = parseInt(savedTotalRounds);
-            } else {
-                totalRounds = defaultTotalRounds;
-            }
+            maxHp = savedMaxHp ? parseInt(savedMaxHp) : defaultMaxHp;
+            document.getElementById('max-hp-input').value = maxHp;
+            totalRounds = savedTotalRounds ? parseInt(savedTotalRounds) : defaultTotalRounds;
 
             if (savedPlayers) {
                 participants = JSON.parse(savedPlayers);
             } else {
-                // 網頁端初始化配置：全體歸零，建立指定局數的空矩陣
                 participants = defaultParticipants.map(p => ({
                     name: p.name,
                     hp: p.hp,
-                    roundScores: Array(totalRounds).fill(0)
+                    roundScores: Array(totalRounds).fill(0),
+                    totalPoints: 0,
+                    rank: 1
                 }));
+                calculateTotalAndRanks(participants);
+                participants.sort((a, b) => b.hp - a.hp);
             }
 
-            // 防呆補齊局數
+            // 補齊可能缺失的賽局
             participants.forEach(p => {
                 if(!p.roundScores) p.roundScores = [];
-                while(p.roundScores.length < totalRounds) {
-                    p.roundScores.push(0);
-                }
+                while(p.roundScores.length < totalRounds) p.roundScores.push(0);
             });
 
+            scratchpad = JSON.parse(JSON.stringify(participants));
+            hasUnsavedChanges = false;
+
             updateRoundDropdown();
-            updateDataAndRender();
+            renderUI();
+            buildSetupForm(); // 初始化表單欄位
         }
 
-        // 更新控制列的局數選單
+        // 開關名單表單顯示
+        function toggleSetupSection() {
+            const sect = document.getElementById('setup-section');
+            sect.style.display = (sect.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // 建立/重繪設定表單的輸入列
+        function buildSetupForm() {
+            const container = document.getElementById('player-inputs-list');
+            container.innerHTML = '';
+            // 讀取當前的參賽者名單填入表單
+            scratchpad.forEach(p => {
+                addPlayerInputRow(p.name, p.hp);
+            });
+        }
+
+        // 追加一個名單輸入行
+        function addPlayerInputRow(name = '', hp = 20) {
+            const container = document.getElementById('player-inputs-list');
+            const row = document.createElement('div');
+            row.className = 'player-input-row';
+            row.innerHTML = `
+                <label>參賽者名稱：</label>
+                <input type="text" placeholder="輸入名稱" value="${name}" class="setup-name-input">
+                <label>初始血量：</label>
+                <input type="number" min="0" value="${hp}" class="setup-hp-input">
+                <button type="button" class="btn-hp-sub" style="padding: 6px 10px;" onclick="this.parentElement.remove()">❌ 刪除</button>
+            `;
+            container.appendChild(row);
+        }
+
+        // 🔥 從表單讀取並導入全新賽事名單
+        function importCustomNewTournament() {
+            const rows = document.querySelectorAll('.player-input-row');
+            let newPlayersList = [];
+            
+            for(let i = 0; i < rows.length; i++) {
+                let name = rows[i].querySelector('.setup-name-input').value.trim();
+                let hp = parseInt(rows[i].querySelector('.setup-hp-input').value);
+                
+                if (name === '') {
+                    alert("導入失敗：參賽者名稱不能為空！");
+                    return;
+                }
+                if (isNaN(hp) || hp < 0) hp = 0;
+                
+                newPlayersList.push({ name: name, hp: hp });
+            }
+
+            if(newPlayersList.length === 0) {
+                alert("導入失敗：至少需要填寫一名參賽者！");
+                return;
+            }
+
+            if(confirm("🔥 警告：導入新名單將會完全清除目前各局的得分紀錄並開啟全新對戰，確定要繼續嗎？")) {
+                // 網頁端初始化各局資料
+                participants = newPlayersList.map(p => ({
+                    name: p.name,
+                    hp: p.hp,
+                    roundScores: Array(totalRounds).fill(0),
+                    totalPoints: 0,
+                    rank: 1
+                }));
+                
+                calculateTotalAndRanks(participants);
+                participants.sort((a, b) => b.hp - a.hp);
+                
+                // 同步至暫存與儲存
+                scratchpad = JSON.parse(JSON.stringify(participants));
+                hasUnsavedChanges = false;
+                saveToLocalStorage();
+                renderUI();
+                
+                // 收合並提示
+                document.getElementById('setup-section').style.display = 'none';
+                alert("🎉 新名單與初始命數已順利導入並同步！");
+            }
+        }
+
         function updateRoundDropdown() {
             const select = document.getElementById('round-select');
             select.innerHTML = '';
@@ -377,31 +520,33 @@
 
         function changeCurrentRound(val) {
             currentRound = parseInt(val);
-            renderTopTable(); // 刷新按鈕文字提示
+            renderTopTable(); 
         }
 
-        // ➕ 新增局數
         function addNewRound() {
+            if(hasUnsavedChanges) {
+                if(!confirm("目前有未發布的變更，新增局數將會自動發布並保存當前更動，是否繼續？")) return;
+                commitChanges();
+            }
             totalRounds++;
-            participants.forEach(p => {
-                p.roundScores.push(0); 
-            });
-            currentRound = totalRounds; 
+            participants.forEach(p => p.roundScores.push(0));
+            scratchpad.forEach(p => p.roundScores.push(0));
+            currentRound = totalRounds;
             updateRoundDropdown();
-            updateDataAndRender();
+            commitChanges(); 
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('sk_tour_v6_players', JSON.stringify(participants));
-            localStorage.setItem('sk_tour_v6_maxhp', maxHp.toString());
-            localStorage.setItem('sk_tour_v6_totalrounds', totalRounds.toString());
+            localStorage.setItem('sk_tour_v8_players', JSON.stringify(participants));
+            localStorage.setItem('sk_tour_v8_maxhp', maxHp.toString());
+            localStorage.setItem('sk_tour_v8_totalrounds', totalRounds.toString());
         }
 
         function resetToDefault() {
-            if (confirm("確定要清除所有紀錄，重新開啟一場 10 局的新賽事嗎？")) {
-                localStorage.removeItem('sk_tour_v6_players');
-                localStorage.removeItem('sk_tour_v6_maxhp');
-                localStorage.removeItem('sk_tour_v6_totalrounds');
+            if (confirm("確定要將全賽局完全清除並重設至最初始的狀態嗎？")) {
+                localStorage.removeItem('sk_tour_v8_players');
+                localStorage.removeItem('sk_tour_v8_maxhp');
+                localStorage.removeItem('sk_tour_v8_totalrounds');
                 document.getElementById('max-hp-input').value = defaultMaxHp;
                 totalRounds = defaultTotalRounds;
                 currentRound = 1;
@@ -413,103 +558,135 @@
             let val = parseInt(value);
             if (!isNaN(val) && val > 0) {
                 maxHp = val;
-                saveToLocalStorage();
-                renderTopTable(); 
-                renderBottomTable();
+                localStorage.setItem('sk_tour_v8_maxhp', maxHp.toString());
+                renderTopTable();
             }
         }
 
-        // 核心數據整合
-        function updateDataAndRender() {
-            calculateTotalAndRanks();
-            // 核心排序：一律依照【血量由高到低】排列
-            participants.sort((a, b) => b.hp - a.hp);
-            
-            renderTopTable();
-            renderBottomTable();
-            saveToLocalStorage();
-        }
-
-        // 計算總分與名次 (名次由累積總分決定)
-        function calculateTotalAndRanks() {
-            participants.forEach(p => {
+        function calculateTotalAndRanks(targetArray) {
+            targetArray.forEach(p => {
                 p.totalPoints = p.roundScores.reduce((sum, score) => sum + score, 0);
             });
-
-            let sortedByPoints = [...participants].sort((a, b) => b.totalPoints - a.totalPoints);
+            let sorted = [...targetArray].sort((a, b) => b.totalPoints - a.totalPoints);
             let currentRank = 1;
-            
-            for (let i = 0; i < sortedByPoints.length; i++) {
-                if (i > 0 && sortedByPoints[i].totalPoints < sortedByPoints[i - 1].totalPoints) {
+            for (let i = 0; i < sorted.length; i++) {
+                if (i > 0 && sorted[i].totalPoints < sorted[i - 1].totalPoints) {
                     currentRank = i + 1;
                 }
-                let originalObj = participants.find(p => p.name === sortedByPoints[i].name);
-                if (originalObj) {
-                    originalObj.rank = currentRank;
-                }
+                let originalObj = targetArray.find(p => p.name === sorted[i].name);
+                if (originalObj) originalObj.rank = currentRank;
             }
         }
 
-        // 數值增減
         function changeValue(name, type, amount) {
-            let player = participants.find(p => p.name === name);
+            let player = scratchpad.find(p => p.name === name);
             if (player) {
                 if (type === 'hp') {
-                    player.hp += amount;
-                    if (player.hp < 0) player.hp = 0; 
+                    player.hp = Math.max(0, player.hp + amount);
                 } else if (type === 'points') {
-                    player.roundScores[currentRound - 1] += amount;
-                    if (player.roundScores[currentRound - 1] < 0) player.roundScores[currentRound - 1] = 0; 
+                    player.roundScores[currentRound - 1] = Math.max(0, player.roundScores[currentRound - 1] + amount);
                 }
-                updateDataAndRender();
+                checkUnsavedChanges();
+                renderTopTable(); 
             }
         }
 
-        // ✏️ 自訂對話框
         function customEdit(name) {
-            let player = participants.find(p => p.name === name);
+            let player = scratchpad.find(p => p.name === name);
             if (player) {
                 let newHp = prompt(`請輸入【${player.name}】的最新血量：`, player.hp);
                 if (newHp !== null && newHp.trim() !== "" && !isNaN(newHp)) {
                     player.hp = Math.max(0, parseInt(newHp));
                 }
-
                 let currentRoundScore = player.roundScores[currentRound - 1];
                 let newScore = prompt(`請輸入【${player.name}】在【第 ${currentRound} 局】的得分：`, currentRoundScore);
                 if (newScore !== null && newScore.trim() !== "" && !isNaN(newScore)) {
                     player.roundScores[currentRound - 1] = Math.max(0, parseInt(newScore));
                 }
-                
-                updateDataAndRender();
+                checkUnsavedChanges();
+                renderTopTable();
             }
         }
 
-        // 渲染上方表格（主面板）
+        function checkUnsavedChanges() {
+            let isDifferent = false;
+            for (let i = 0; i < scratchpad.length; i++) {
+                let p = participants.find(orig => orig.name === scratchpad[i].name);
+                if (p) {
+                    if (p.hp !== scratchpad[i].hp) isDifferent = true;
+                    if (JSON.stringify(p.roundScores) !== JSON.stringify(scratchpad[i].roundScores)) isDifferent = true;
+                }
+            }
+            hasUnsavedChanges = isDifferent;
+            const btn = document.getElementById('main-submit-btn');
+            if (hasUnsavedChanges) {
+                btn.classList.add('glow');
+                btn.innerText = "💾 內容已變更：點此發布更新";
+            } else {
+                btn.classList.remove('glow');
+                btn.innerText = "🚀 確定發布變更";
+            }
+        }
+
+        // 🚀 確認發布變更並刷新全網頁排序基準
+        function commitChanges() {
+            participants = JSON.parse(JSON.stringify(scratchpad));
+            calculateTotalAndRanks(participants);
+            // 核心排序：按血量從高到低
+            participants.sort((a, b) => b.hp - a.hp);
+            scratchpad = JSON.parse(JSON.stringify(participants));
+            
+            hasUnsavedChanges = false;
+            const btn = document.getElementById('main-submit-btn');
+            btn.classList.remove('glow');
+            btn.innerText = "🚀 確定發布變更";
+
+            saveToLocalStorage();
+            renderUI();
+            buildSetupForm(); // 同步重繪設定表單的當前狀態
+            alert("✅ 排行榜已依照全新血量高低重新排列發布！");
+        }
+
+        function renderUI() {
+            renderTopTable();
+            renderBottomTable();
+        }
+
         function renderTopTable() {
             const tbody = document.getElementById('top-table-body');
             tbody.innerHTML = '';
 
-            participants.forEach(p => {
+            participants.forEach(origPlayer => {
+                let p = scratchpad.find(item => item.name === origPlayer.name);
+                if(!p) return;
+                
+                let isHpDirty = p.hp !== origPlayer.hp;
+                let tempTotalPoints = p.roundScores.reduce((s, c) => s + c, 0);
+                let isPointsDirty = JSON.stringify(p.roundScores) !== JSON.stringify(origPlayer.roundScores);
+
                 const tr = document.createElement('tr');
 
                 let rankClass = '';
-                if (p.rank === 1) rankClass = 'rank-1';
-                else if (p.rank === 2) rankClass = 'rank-2';
-                else if (p.rank === 3) rankClass = 'rank-3';
+                if (origPlayer.rank === 1) rankClass = 'rank-1';
+                else if (origPlayer.rank === 2) rankClass = 'rank-2';
+                else if (origPlayer.rank === 3) rankClass = 'rank-3';
 
                 let hpPercent = Math.min((p.hp / maxHp) * 100, 100);
                 if (hpPercent < 0) hpPercent = 0;
 
                 tr.innerHTML = `
                     <td><strong>${p.name}</strong></td>
-                    <td>
+                    <td class="${isHpDirty ? 'dirty-cell' : ''}">
                         <span style="display:inline-block; width:35px; text-align:right; font-weight:bold;">${p.hp}</span>
+                        ${isHpDirty ? '<span style="color:#ffa502">⚠️</span>' : ''}
                         <div class="hp-bar-container">
                             <div class="hp-bar" style="width: ${hpPercent}%;"></div>
                         </div>
                     </td>
-                    <td style="font-weight: bold; color: #ffa502;">${p.totalPoints} 分</td>
-                    <td class="${rankClass}">第 ${p.rank} 名</td>
+                    <td class="${isPointsDirty ? 'dirty-cell' : ''}" style="font-weight: bold; color: #ffa502;">
+                        ${tempTotalPoints} 分 ${isPointsDirty ? '<span style="font-size:0.8rem;color:#ffa502">(✏️)</span>' : ''}
+                    </td>
+                    <td class="${rankClass}">第 ${origPlayer.rank} 名</td>
                     <td>
                         <div class="action-btns">
                             <button class="btn-hp-add" onclick="changeValue('${p.name}', 'hp', 1)">+1 血</button>
@@ -524,9 +701,7 @@
             });
         }
 
-        // 渲染下方表格（各局明細大表）
         function renderBottomTable() {
-            // 1. 生成表頭
             const thead = document.getElementById('bottom-table-head');
             let headHtml = `<tr><th>參賽者</th>`;
             for (let i = 1; i <= totalRounds; i++) {
@@ -535,7 +710,6 @@
             headHtml += `<th>總名次</th></tr>`;
             thead.innerHTML = headHtml;
 
-            // 2. 生成內容
             const tbody = document.getElementById('bottom-table-body');
             tbody.innerHTML = '';
 
@@ -547,7 +721,6 @@
                 else if (p.rank === 2) rankClass = 'rank-2';
                 else if (p.rank === 3) rankClass = 'rank-3';
 
-                // 生成每局的分數 TD 串
                 let scoresTdHtml = '';
                 p.roundScores.forEach(score => {
                     let cellClass = score > 0 ? 'round-cell has-value' : 'round-cell';
