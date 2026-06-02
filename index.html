@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>失控事務所積分錦標賽</title>
     
-    <!-- 鎖定 Google Fonts：Share Tech Mono (數據科幻風) 與 思源黑體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -126,7 +125,7 @@
             text-align: center;
         }
 
-        /* 👥 名單設置表單區塊樣式 */
+        /* 名單設置表單區塊樣式 */
         .setup-toggle-btn {
             background-color: #3e4452;
             color: #fff;
@@ -141,7 +140,7 @@
         }
         
         .setup-container {
-            display: none; /* 預設收合 */
+            display: none; 
             width: 100%;
             max-width: 1150px;
             background-color: #1c222d;
@@ -182,6 +181,11 @@
             color: #ffa502;
             font-weight: bold;
             letter-spacing: 1px;
+        }
+
+        th.sort-indicator-header {
+            color: #2ed573;
+            text-shadow: 0 0 5px rgba(46, 213, 115, 0.3);
         }
 
         tbody tr {
@@ -284,116 +288,106 @@
 </head>
 <body>
 
-    <h1>失控事務所積分錦標賽</h1>
+    <h1>失控事務所積分錦錦標賽</h1>
 
-    <!-- 👥 可展開/收合的名單初始設定表單 -->
     <button class="setup-toggle-btn" onclick="toggleSetupSection()">👥 點此展開/收合：名單與初始血量設定表單</button>
     <div id="setup-section" class="setup-container">
         <h3 style="margin-top:0; color:#2ed573;">🛠️ 撰寫本次參賽名單與命數 (初始血量)</h3>
-        <p style="color:#aaa; font-size:0.9rem; margin-bottom:15px;">提示：導入新名單會重置當前所有對戰局數的分數，請在賽事開始前設定完成。</p>
+        <p style="color:#aaa; font-size:0.9rem; margin-bottom:15px;">提示：導入新名單會重置當前對戰紀錄，請在賽事開始前設定完成。</p>
         
         <div id="player-inputs-list">
-            <!-- 由 JS 動態渲染輸入行 -->
-        </div>
+            </div>
         
         <div style="margin-top: 15px; display: flex; gap: 10px;">
-            <button type="button" class="btn-edit" onclick="addPlayerInputRow('', 20)">➕ 追加新參賽者</button>
+            <button type="button" class="btn-edit" onclick="addPlayerInputRow('', 11)">➕ 追加新參賽者</button>
             <button type="button" class="btn-success" onclick="importCustomNewTournament()">🔥 導入名單並開啟新賽局</button>
         </div>
     </div>
 
-    <!-- 頂部運行控制列 -->
     <div class="config-bar">
         <div class="config-left">
             <div class="config-item">
                 <label for="max-hp-input">🩸 血量顯示上限：</label>
-                <input type="number" id="max-hp-input" value="20" min="1" oninput="updateMaxHp(this.value)">
+                <input type="number" id="max-hp-input" value="11" min="1" oninput="updateMaxHp(this.value)">
             </div>
             
             <div class="config-item">
                 <label for="round-select">🎮 目前管理局數：</label>
                 <select id="round-select" onchange="changeCurrentRound(this.value)">
-                    <!-- JS 動態生成 -->
-                </select>
+                    </select>
             </div>
 
             <button class="btn-add-round" onclick="addNewRound()">➕ 新增局數</button>
             <button class="btn-reset" onclick="resetToDefault()">🔄 全賽局重設</button>
         </div>
         
-        <!-- 大確認發布按鈕 -->
         <button id="main-submit-btn" class="btn-submit-all" onclick="commitChanges()">🚀 確定發布變更</button>
     </div>
 
-    <!-- 上方區塊：暫存操作面板 -->
-    <h2>⚔️ 實時對戰操作面板 (按下發布變更鈕後才會更新排序)</h2>
+    <h2>⚔️ 實時對戰操作面板 (按下發布變更後依血量及積分刷新排序)</h2>
     <div class="container">
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
                         <th>參賽者</th>
-                        <th>血量</th>
-                        <th>已獲得積分</th>
+                        <th class="sort-indicator-header">血量 (▼1)</th>
+                        <th class="sort-indicator-header">已獲得積分 (▼2)</th>
                         <th>名次</th>
                         <th>操作 (僅修改暫存，不影響目前排行)</th>
                     </tr>
                 </thead>
                 <tbody id="top-table-body">
-                    <!-- JS 動態渲染 -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
 
-    <!-- 下方區塊：明細表格 -->
     <h2>📊 各局得分明細數據大表</h2>
     <div class="container">
         <div class="table-wrapper">
             <table>
                 <thead id="bottom-table-head">
-                    <!-- JS 動態生成 -->
-                </thead>
+                    </thead>
                 <tbody id="bottom-table-body">
-                    <!-- JS 動態渲染 -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // 內建預設名單 (第一次開啟時使用)
+        // 核心修正：直接寫入要求的 11 位新參賽者與對應初始血量
         const defaultParticipants = [
-                        { name: "emily", hp: 2 }, 
-
-            { name: "jamie", hp: 11 }, 
-            { name: "怡", hp: 9 }, 
-            { name: "wei", hp: 11 }, 
-            { name: "羊", hp: 1 } , 
-            { name: "大學", hp: 8 }, 
-            { name: "難", hp: 5 }, 
-            { name: "翠翠", hp: 11 }, 
-            { name: "呱", hp: 6 } ,
+            { name: "emily", hp: 2 },
+            { name: "jamie", hp: 11 },
+            { name: "怡", hp: 9 },
+            { name: "wei", hp: 11 },
+            { name: "羊", hp: 1 },
+            { name: "大學", hp: 8 },
+            { name: "難", hp: 5 },
+            { name: "翠翠", hp: 11 },
+            { name: "呱", hp: 6 },
             { name: "alisa", hp: 8 },
-            { name: "九同", hp: 1 }  
+            { name: "九同", hp: 1 }
         ];
         
-        const defaultMaxHp = 20;
+        // 核心修正：血量上限預設改為 11
+        const defaultMaxHp = 11;
         const defaultTotalRounds = 10;
 
-        let participants = []; // 正式資料
-        let scratchpad = [];   // 暫存草稿區
+        let participants = []; // 正式封存資料
+        let scratchpad = [];   // 當前畫面的即時草稿暫存區
 
-        let maxHp = 20;
+        let maxHp = 11;
         let totalRounds = 10;
         let currentRound = 1; 
         let hasUnsavedChanges = false;
 
         // 初始化
         function init() {
-            const savedPlayers = localStorage.getItem('sk_tour_v8_players');
-            const savedMaxHp = localStorage.getItem('sk_tour_v8_maxhp');
-            const savedTotalRounds = localStorage.getItem('sk_tour_v8_totalrounds');
+            const savedPlayers = localStorage.getItem('sk_tour_v10_players');
+            const savedMaxHp = localStorage.getItem('sk_tour_v10_maxhp');
+            const savedTotalRounds = localStorage.getItem('sk_tour_v10_totalrounds');
 
             maxHp = savedMaxHp ? parseInt(savedMaxHp) : defaultMaxHp;
             document.getElementById('max-hp-input').value = maxHp;
@@ -409,11 +403,11 @@
                     totalPoints: 0,
                     rank: 1
                 }));
+                // 首次載入計算總分排名，並套用血量/積分雙層權重排序
                 calculateTotalAndRanks(participants);
-                participants.sort((a, b) => b.hp - a.hp);
+                sortParticipantsArray(participants);
             }
 
-            // 補齊可能缺失的賽局
             participants.forEach(p => {
                 if(!p.roundScores) p.roundScores = [];
                 while(p.roundScores.length < totalRounds) p.roundScores.push(0);
@@ -424,27 +418,25 @@
 
             updateRoundDropdown();
             renderUI();
-            buildSetupForm(); // 初始化表單欄位
+            buildSetupForm();
         }
 
-        // 開關名單表單顯示
+        // 展開/收合設定選單
         function toggleSetupSection() {
             const sect = document.getElementById('setup-section');
             sect.style.display = (sect.style.display === 'block') ? 'none' : 'block';
         }
 
-        // 建立/重繪設定表單的輸入列
+        // 重繪表單設定欄位
         function buildSetupForm() {
             const container = document.getElementById('player-inputs-list');
             container.innerHTML = '';
-            // 讀取當前的參賽者名單填入表單
             scratchpad.forEach(p => {
                 addPlayerInputRow(p.name, p.hp);
             });
         }
 
-        // 追加一個名單輸入行
-        function addPlayerInputRow(name = '', hp = 20) {
+        function addPlayerInputRow(name = '', hp = 11) {
             const container = document.getElementById('player-inputs-list');
             const row = document.createElement('div');
             row.className = 'player-input-row';
@@ -458,7 +450,6 @@
             container.appendChild(row);
         }
 
-        // 🔥 從表單讀取並導入全新賽事名單
         function importCustomNewTournament() {
             const rows = document.querySelectorAll('.player-input-row');
             let newPlayersList = [];
@@ -481,8 +472,7 @@
                 return;
             }
 
-            if(confirm("🔥 警告：導入新名單將會完全清除目前各局的得分紀錄並開啟全新對戰，確定要繼續嗎？")) {
-                // 網頁端初始化各局資料
+            if(confirm("🔥 警告：導入新名單會完全重置並清除目前所有局數分數，確定要繼續嗎？")) {
                 participants = newPlayersList.map(p => ({
                     name: p.name,
                     hp: p.hp,
@@ -492,17 +482,15 @@
                 }));
                 
                 calculateTotalAndRanks(participants);
-                participants.sort((a, b) => b.hp - a.hp);
+                sortParticipantsArray(participants);
                 
-                // 同步至暫存與儲存
                 scratchpad = JSON.parse(JSON.stringify(participants));
                 hasUnsavedChanges = false;
                 saveToLocalStorage();
                 renderUI();
                 
-                // 收合並提示
                 document.getElementById('setup-section').style.display = 'none';
-                alert("🎉 新名單與初始命數已順利導入並同步！");
+                alert("🎉 新名單已順利導入並同步！");
             }
         }
 
@@ -537,16 +525,16 @@
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('sk_tour_v8_players', JSON.stringify(participants));
-            localStorage.setItem('sk_tour_v8_maxhp', maxHp.toString());
-            localStorage.setItem('sk_tour_v8_totalrounds', totalRounds.toString());
+            localStorage.setItem('sk_tour_v10_players', JSON.stringify(participants));
+            localStorage.setItem('sk_tour_v10_maxhp', maxHp.toString());
+            localStorage.setItem('sk_tour_v10_totalrounds', totalRounds.toString());
         }
 
         function resetToDefault() {
-            if (confirm("確定要將全賽局完全清除並重設至最初始的狀態嗎？")) {
-                localStorage.removeItem('sk_tour_v8_players');
-                localStorage.removeItem('sk_tour_v8_maxhp');
-                localStorage.removeItem('sk_tour_v8_totalrounds');
+            if (confirm("確定要將本場賽事完全重設至最初始的狀態嗎？")) {
+                localStorage.removeItem('sk_tour_v10_players');
+                localStorage.removeItem('sk_tour_v10_maxhp');
+                localStorage.removeItem('sk_tour_v10_totalrounds');
                 document.getElementById('max-hp-input').value = defaultMaxHp;
                 totalRounds = defaultTotalRounds;
                 currentRound = 1;
@@ -558,7 +546,7 @@
             let val = parseInt(value);
             if (!isNaN(val) && val > 0) {
                 maxHp = val;
-                localStorage.setItem('sk_tour_v8_maxhp', maxHp.toString());
+                localStorage.setItem('sk_tour_v10_maxhp', maxHp.toString());
                 renderTopTable();
             }
         }
@@ -578,6 +566,17 @@
             }
         }
 
+        // 雙重排序邏輯 (第一條件：血量高到低；第二條件：總積分高到低)
+        function sortParticipantsArray(targetArray) {
+            targetArray.sort((a, b) => {
+                if (b.hp !== a.hp) {
+                    return b.hp - a.hp;
+                }
+                return b.totalPoints - a.totalPoints;
+            });
+        }
+
+        // 修改暫存草稿區，發布前行數位置完全鎖定，避免賽事人員狂按時點錯行
         function changeValue(name, type, amount) {
             let player = scratchpad.find(p => p.name === name);
             if (player) {
@@ -628,12 +627,15 @@
             }
         }
 
-        // 🚀 確認發布變更並刷新全網頁排序基準
+        // 🚀 大確認送出：依照血量與分數加權，對控制面板及明細重新做大重組排序
         function commitChanges() {
             participants = JSON.parse(JSON.stringify(scratchpad));
             calculateTotalAndRanks(participants);
-            // 核心排序：按血量從高到低
-            participants.sort((a, b) => b.hp - a.hp);
+            
+            // 執行雙權重排序演算法
+            sortParticipantsArray(participants);
+            
+            // 同步回暫存區，使其在發布的一瞬間更新為完美的名次行數
             scratchpad = JSON.parse(JSON.stringify(participants));
             
             hasUnsavedChanges = false;
@@ -643,8 +645,8 @@
 
             saveToLocalStorage();
             renderUI();
-            buildSetupForm(); // 同步重繪設定表單的當前狀態
-            alert("✅ 排行榜已依照全新血量高低重新排列發布！");
+            buildSetupForm();
+            alert("✅ 排行榜已依照全新數據洗牌更新（主要依據：血量；次要依據：積分）");
         }
 
         function renderUI() {
